@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Checkers Game</title>
+
+    <style>
+        td {
+            border: 1px solid #000;
+            width: 30px;
+            height: 30px;
+        }
+
+        .tdBlack {
+            background-color: black;
+        }
+
+        .tdWhite {
+            background-color: white;
+        }
+
+        .tdGreen {
+            background-color: green;
+        }
+
+        .tdYellow {
+            background-color: yellow;
+        }
+
+        .tdOrange {
+            background-color: orange;
+        }
+    </style>
+
+    
+    <script>
+
+        function buildBoard(dim) {
+
+            console.log("hi");
+            var str = "";
+            str += "<table>";
+            var flag = -1;
+            var index;
+            for (var i = 0; i < dim; i++) {
+                str += "<tr>";
+                for (var j = 0; j < dim; j++) {
+                    index = 1 + dim * i + j;
+                    if (flag == -1) {
+                        str += '<td class="tdBlack" id = '+index+' onclick="colorChanger(this)"> </td>';
+                    }
+                    else {
+                        str += '<td class="tdWhite" id = ' + index +' onclick="colorChanger(this)"> </td>';
+                    }
+                    flag = flag * -1;
+
+                }
+                str += "</tr>";
+                flag = dim % 2 == 0 ? flag * -1 : flag;
+            }
+            str += "<table>";
+
+            document.getElementById("ph").innerHTML = str;
+
+
+        }
+
+    </script>
+    <script>
+        let wallet = JSON.parse(sessionStorage.getItem("walletVal"));
+        if (wallet == null) {
+            wallet = 50;
+        }
+        
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * max) + 1
+        }
+        let j = 0;
+        let arrChoose = [];
+        let yellowSquare = [];
+        for (let i = 0; i < 5; i++) {
+            let temp = Math.floor(Math.random() * 63) + 1;
+            while (yellowSquare.includes(temp)) { temp = Math.floor(Math.random() * 63) + 1; }
+            yellowSquare[i] = temp;
+        }
+        console.log(yellowSquare);
+        console.log(arrChoose);
+
+        function colorChanger(squareGreen) {
+            if (j >= 5)
+                return;
+            if (arrChoose.includes(squareGreen.id))
+                return;
+            squareGreen.style.backgroundColor = "green";
+            arrChoose[j] = squareGreen.id;
+            if (yellowSquare.includes(parseInt(squareGreen.id)))
+                wallet += 50;
+            document.getElementById("moneyLeft").innerHTML = `Money left ${wallet}`;
+            document.getElementById("roundNum").innerHTML = `Round Number:  ${j+1}`;
+            console.log(arrChoose[j]);
+            console.log(arrChoose);
+            j++;
+            if (j == 5)
+                calcSquares()
+        }
+
+        function calcSquares() {
+
+            for (let k = 0; k < (yellowSquare.length); k++) {
+                let x = yellowSquare[k];
+                document.getElementById(parseInt(x)).style.backgroundColor = "yellow";
+            }
+            let isLose = 1;
+            for (let k = 0; k < (yellowSquare.length); k++) {
+                if (yellowSquare.includes(parseInt(arrChoose[k]))) {
+                    let x = parseInt(arrChoose[k]);
+                    document.getElementById(x).style.backgroundColor = "orange";
+                    isLose = 0;
+                }
+            }
+            if (isLose)
+                wallet -= 50;
+            document.getElementById("moneyLeft").innerHTML = `Money left ${wallet}`;
+            console.log(wallet)
+            endGame();
+        }
+
+        function endGame()
+        {
+            if (wallet < 50)
+            {
+                document.getElementById("gameTxt").innerHTML = "<h1> GAME OVER! </h1> <br/> <input type = 'button' value = 'Start Over' onclick = window.location.reload(); />"
+            }
+            else
+            {
+                sessionStorage.setItem("walletVal", JSON.stringify(wallet));
+                var str = "";
+                str += document.getElementById('gameTxt').outerHTML;
+                str += "<input type='button' value='Continue Playing' onclick= 'history.go(0)'/>";
+                document.getElementById("gameTxt").innerHTML = str;
+         
+            }
+        }
+
+
+    </script>
+</head>
+<body>
+    <div >
+        <div id="ph" style=" float:left"> 
+        </div>
+        <div id="gameTxt" style="float:inline-start">
+            <h1>Game Rules:</h1>
+            <p>
+                Select 5 blocks, your blocks will be colored in green. <br />The computer will also select 5 blocks,
+                they will be colored in yellow<br />If you choose a block that the computer chose, it will be colored in orange<br />
+                You will win 50 shekels for every block that you choose correctly, and lose 50 shekels if you chose
+                none of the blocks that the computer chose <br />While you still have money in youre wallet you can play again
+            </p>
+            <h3 id="roundNum"> Round Number: </h3>
+            <h3 id="moneyLeft">Money Left: </h3>
+        </div>
+    </div>
+    <script>
+        buildBoard(8);
+        document.getElementById("moneyLeft").innerHTML = `Money left ${wallet}`;
+    </script>
+</body>
+</html>
